@@ -1,5 +1,6 @@
 import json
 import os
+import re
 from sentence_transformers import SentenceTransformer
 import numpy as np
 
@@ -48,6 +49,43 @@ def search(query, chunks, top_k=5):
         })
 
     return results
+
+
+def search_full(query, chunks, top_k=3):
+    """Search for most relevant chunks, return full chunk objects (no truncation)."""
+    query_embedding = model.encode([query])[0]
+
+    scores = []
+    for chunk in chunks:
+        chunk_embedding = np.array(chunk['embedding'])
+        score = np.dot(query_embedding, chunk_embedding)
+        scores.append(score)
+
+    top_indices = np.argsort(scores)[-top_k:][::-1]
+
+    results = []
+    for i in top_indices:
+        result = {k: v for k, v in chunks[i].items() if k != 'embedding'}
+        result['score'] = float(scores[i])
+        results.append(result)
+
+    return results
+
+
+def get_story_beats(company, story, all_chunks):
+    """Return all beats for a story in order, stripping embeddings."""
+    beats = [
+        {k: v for k, v in c.items() if k != 'embedding'}
+        for c in all_chunks
+        if c.get('company') == company and c.get('story') == story
+    ]
+
+    def beat_num(chunk):
+        m = re.match(r'Beat (\d+)', chunk.get('beat', ''))
+        return int(m.group(1)) if m else 999
+
+    beats.sort(key=beat_num)
+    return beats
 
 if __name__ == "__main__":
     # Test: load chunks and create embeddings
