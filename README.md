@@ -9,7 +9,6 @@ I keep structured notes in Notion - project retrospectives, technical decisions,
 Semantic search fixes this. "Tell me about improving accuracy" matches a note about raising RAG precision from 78% to 96%, even though the word "accuracy" never appears in that note.
 
 ## Architecture
-
 ```
 Voice Input → Whisper (local) → Text Query
                                     ↓
@@ -41,18 +40,16 @@ Voice Input → Whisper (local) → Text Query
 **Chunking by semantic unit, not by token window**: Notes are pre-structured in Notion with named sections. Chunk boundaries carry semantic meaning rather than being arbitrary token splits. A "metric" section contains the quantitative result. An "action" section contains what happened. Search results map directly to the piece you actually need. This mirrors a core lesson from building RAG pipelines at Kunik: chunk strategy drives retrieval quality more than model selection.
 
 ## File Structure
-
 ```
 ├── app.py                          # Flask web interface
 ├── main.py                         # Notion sync + embedding generation
 ├── embeddings.py                   # Model loading, vector search
-├── chunks.json                     # Note chunks with metadata
-├── chunks_with_embeddings.json     # Chunks + 384-dim vectors
+├── chunks.json                     # Generated locally, gitignored
+├── chunks_with_embeddings.json     # Generated locally, gitignored
 └── pyproject.toml                  # Dependencies (managed with uv)
 ```
 
 ## Setup
-
 ```bash
 git clone https://github.com/hebaasmar/second-brain.git
 cd second-brain
